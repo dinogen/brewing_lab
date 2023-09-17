@@ -1,0 +1,26 @@
+{% extends "chart_template.html" %} 
+{% block head %}
+<script type="text/javascript">
+
+    function drawChart() {
+        var jsonData = $.ajax({
+            url: "{{json_url}}",
+            dataType: "json",
+            async: false
+        }).responseText;
+        var data = JSON.parse(jsonData);
+        for (i = 0; i < data.length; i++) {
+            var row = data[i];
+            $("#mytable").append("<tr><td>" + row[0] + "</td><td>" + row[1] + "</td></tr>");
+        }
+    }
+</script> 
+{% endblock %} 
+{% block body %}
+<table id="mytable" class="table table-striped">
+    <tr>
+        <th>DateTime</th>
+        <th>Result</th>
+    </tr>
+</table>
+{% endblock %}

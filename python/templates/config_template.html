@@ -1,0 +1,34 @@
+{% extends "base_template.html" %} {% block head %} {% endblock %} {% block body %}
+
+<form action="config.html" method="post">
+        <div>Serial device = {{config.serial_dev}}</div>
+        <div>Base URL = {{config.base_url}}</div>
+        <div class="form-group">
+        <label for="ideal_temp">Temperature</label>
+        <input type="number" class="form-control" id="ideal_temp" name="ideal_temp" value="{{ideal_temp}}">
+        <small class="form-text text-muted">Ideal temperature (Celsius degrees)</small>
+    </div>
+    <div class="form-group">
+        <label for="stir_time">Stirring time</label>
+        <input type="number" class="form-control" id="stir_time" name="stir_time" value="{{stir_time}}">
+        <small class="form-text text-muted">Stirring duration in seconds, 0 to disable</small>
+    </div>
+    <div class="form-group">
+        <label for="stir_delay">Stirring and light delay</label>
+        <input type="time" class="form-control" id="stir_delay" name="stir_delay" value="{{stir_delay}}">
+        <small class="form-text text-muted">Delay between two light measurements and stirrings, hh:mm</small>
+    </div>
+    <div class="form-group">
+        <label for="temp_delay">Temperature recording delay</label>
+        <input type="time" class="form-control" id="temp_delay" name="temp_delay" value="{{temp_delay}}">
+        <small class="form-text text-muted">Period of temperature recording, hh:mm</small>
+    </div>
+    <div class="form-group">
+        <label for="heat_delay">Heating delay</label>
+        <input type="time" class="form-control" id="heat_delay" name="heat_delay" value="{{heat_delay}}">
+        <small class="form-text text-muted">Period of checking if heating is necessary, hh:mm</small>
+    </div>
+    <input type="submit" class="btn btn-default" />
+</form>
+
+{% endblock %}

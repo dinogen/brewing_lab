@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+#import pdb
+import com
+import time
+import sched
+import stirrer
+import temp_sensor
+import heater
+import datetime
+import light_sensor
+import led
+
+ideal_temp = 20.0
+ideal_temp_max = ideal_temp + 0.5
+ideal_temp_min = ideal_temp - 0.5
+
+# time in seconds
+STIR_TIME = 30
+STIR_DELAY = 60*30
+TEMP_DELAY = 60*5
+HEAT_DELAY = 60*3
+LIGHT_DELAY = 60*10
+ser = com.open_serial()
+o_sched = sched.scheduler(time.time, time.sleep)
+
+def print_log(msg):
+    ts = time.time()
+    st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+    print(st + " " + msg)
+
+def do_event_stir():
+    print_log("Stirring begin")
+    o_stir = stirrer.stirrer(ser)
+    result = o_stir.stir_for_n_seconds(STIR_TIME)
+    o_stir.save_log(result)
+    o_sched.enter(STIR_DELAY, 1, do_event_stir)
+    print_log("Stirring end")
+
+def do_event_checktemp():
+    print_log("Check temp begin")
+    o_temp = temp_sensor.temp_sensor(ser)
+    t = o_temp.read(0)
+    o_temp.save_log(0,t)
+    t = o_temp.read(1)
+    o_temp.save_log(1,t)
+    o_sched.enter(TEMP_DELAY, 2, do_event_stir)
+    print_log("Check temp end")
+
+def do_event_heat():
+    print_log("Heating begin")
+    o_temp = temp_sensor.temp_sensor(ser)
+    o_heater = heater.heater(ser)
+    t0 = o_temp.read(0)
+    o_temp.save_log(0,t0)
+    t1 = o_temp.read(1)
+    o_temp.save_log(1,t1)
+    t  = (t0+t1)/2.0
+    o_temp.save_log(3,t)
+    print_log("temp = " + str(t))
+    if t < ideal_temp_min:
+        o_heater.turn_on()
+        o_heater.save_log(1)
+    if t > ideal_temp_max:
+        o_heater.turn_off()
+        o_heater.save_log(0)
+    o_sched.enter(HEAT_DELAY,3,do_event_heat)
+    print_log("Heating end")
+
+def do_event_light():
+    print_log("Light measuring begin")
+    o_light = light_sensor.light_sensor(ser)
+    o_led = led.led(ser)
+    o_led.turn_on()
+    time.sleep(1)
+    light = o_light.read()
+    o_led.turn_off()
+    o_light.save_log(light)
+    print_log("light = " + str(light))
+    o_sched.enter(LIGHT_DELAY,4,do_event_light)
+    print_log("Light measuring end")
+
+
+if __name__ == "__main__":
+    do_event_stir()
+    #do_event_checktemp()
+    do_event_heat()
+    do_event_light()
+    o_sched.run()

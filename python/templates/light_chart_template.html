@@ -1,0 +1,14 @@
+{% extends "chart_template.html" %}
+{% block set_data %}
+
+var rawdata = JSON.parse(jsonData);
+var data = new google.visualization.DataTable();
+data.addColumn('date', "Data");
+data.addColumn("number", "Light");
+for (i = 0; i < rawdata.length; i++) {
+    var row = rawdata[i];
+    data.addRow([new Date(row[0],row[1]-1,row[2],row[3],row[4]),row[5]]);
+}
+
+{% endblock %}
+    

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>Fermentation Box</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="refresh" content="150" />
+    <link rel="shortcut icon" type="image/x-icon" href="/static/beer-2.png" />
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+        crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script> {% block head %}{% endblock %}
+</head>
+
+<body onload="{{onloadfunction}}">
+    <ul class="nav nav-tabs">
+        <li role="presentation" class="{{temp_active}}">
+            <a href="temp_chart.html">
+                <span class="glyphicon glyphicon-fire" aria-hidden="true"></span>
+                Temperature
+            </a>
+        </li>
+        <li role="presentation" class="{{temp_avg_active}}">
+            <a href="temp_chart_avg.html">
+                <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+                Hourly Average
+            </a>
+        </li>
+        <li role="presentation" class="{{temp_24h_active}}">
+            <a href="temp_chart_24h.html">
+                <span class="glyphicon glyphicon-time" aria-hidden="true"></span>
+                Last 24H
+            </a>
+        </li>
+        <li role="presentation" class="{{light_active}}">
+            <a href="light_chart.html">
+                <span class="glyphicon glyphicon-adjust" aria-hidden="true"></span>
+                Light
+            </a>
+        </li>
+        <li role="presentation" class="{{stir_active}}">
+            <a href="stir_chart.html">
+                <span class="glyphicon glyphicon-retweet" aria-hidden="true"></span>
+                Stirring
+            </a>
+        </li>
+        <li role="presentation" class="{{config_active}}">
+            <a href="config.html">
+                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                Configuration
+            </a>
+        </li>
+    </ul>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">{{pagetitle}}</div>
+        <div class="panel-body">
+            {% block body %}{% endblock %}
+        </div>
+    </div>
+</body>
+
+</html>
