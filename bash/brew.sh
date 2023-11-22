@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-/home/pi/brewinglab/python/brew.py > /home/pi/brew.log
+/home/pi/brewing_lab/python/brew.py > /home/pi/brew.log
