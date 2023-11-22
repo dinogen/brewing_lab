@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello World!"
+    return render_template('splash_template.html', pagetitle="Brewing Lab Web")
 
 @app.route("/temp_json/<sensor_id>")
 def temp_json1(sensor_id):
@@ -31,7 +31,7 @@ def temp_json3():
     q = """select substr(temp_h,1,4),substr(temp_h,6,2),substr(temp_h,9,2),substr(temp_h,12,2),0,avg(temp) from 
 (select substr(temp_dt,1,13) temp_h,temp from temp_log where sensor_id=3 and temp_dt > '""" + yesterday_string + """')
 group by temp_h
-order by 1"""
+order by 1,2,3,4"""
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute(q)
@@ -48,7 +48,7 @@ def temp_json_daily():
     q = """select substr(temp_h,1,4),substr(temp_h,6,2),substr(temp_h,9,2),0,0,avg(temp) from 
 (select substr(temp_dt,1,10) temp_h,temp from temp_log where sensor_id=3 and temp_dt > '""" + yesterday_string + """')
 group by temp_h
-order by 1"""
+order by 1,2,3"""
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute(q)
@@ -63,7 +63,10 @@ def temp_json_last24():
     yesterday = now - timedelta(days=1) 
     yesterday_string = yesterday.strftime("%Y-%m-%d %H:%M:%S")
 
-    q = "select substr(temp_dt,1,4),substr(temp_dt,6,2),substr(temp_dt,9,2),substr(temp_dt,12,2),substr(temp_dt,15,2), temp from temp_log where sensor_id=3 and temp_dt > '" + yesterday_string + "' order by 1"
+    q = """select substr(temp_dt,1,4),substr(temp_dt,6,2),substr(temp_dt,9,2),substr(temp_dt,12,2),substr(temp_dt,15,2), temp 
+    from temp_log 
+    where sensor_id=3 and temp_dt > '""" + yesterday_string + """' 
+    order by 1,2,3,4,5"""
 
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
@@ -75,20 +78,36 @@ def temp_json_last24():
 
 @app.route("/temp_json/all")
 def temp_json2():
+    now  =  datetime.now(timezone.utc) 
+    past = now - timedelta(days=1) 
+    past_string = past.strftime("%Y-%m-%d %H:%M:%S")
+
+    q = """SELECT y,m,d,hh,mm,sum(temp1), sum(temp2), sum(temp3)
+from 
+(select substr(temp_dt,1,4) as y,substr(temp_dt,6,2) as m,substr(temp_dt,9,2) as d,substr(temp_dt,12,2) as hh,substr(temp_dt,15,2) as mm,
+  case sensor_id
+    when 0 then temp
+    else 0 
+    end as temp1,
+  case sensor_id
+    when 1 then temp
+    else 0 
+    end as temp2,
+  case sensor_id
+    when 3 then temp
+    else 0 
+    end as temp3
+  from temp_log 
+  where temp_dt > '""" + past_string + """') T
+  group by y,m,d,hh,mm
+order by 1,2,3,4,5"""
+
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
-    q= """select dt, sum(t0),sum(t1),sum(t3) from
-(select substr(temp_dt,1,16) dt,temp t0,0 t1,0 t3 from temp_log where temp_dt >= '2017-12-06' and sensor_id=0
-union all
-select substr(temp_dt,1,16) dt,0 t0,temp t1,0 t3 from temp_log where temp_dt >= '2017-12-06' and sensor_id=1
-union all
-select substr(temp_dt,1,16) dt,0 t0,0 t1,temp t3 from temp_log where temp_dt >= '2017-12-06' and sensor_id=3
-)
-group by dt order by 1"""
     c.execute(q)
     all = c.fetchall()
     c.close()
-    conn.close()  
+    conn.close()
     return json.dumps(all)
 
 @app.route("/light_json")
@@ -106,9 +125,12 @@ def light_json():
 
 @app.route("/stir_json")
 def stir_json():
+    now  =  datetime.now(timezone.utc) 
+    yesterday = now - timedelta(days=15) 
+    yesterday_string = yesterday.strftime("%Y-%m-%d %H:%M:%S")
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
-    c.execute('select stir_dt,result from stir_log order by 1 desc')
+    c.execute("select stir_dt,result from stir_log where stir_dt > '" + yesterday_string + "' order by 1 desc")
     all = c.fetchall()
     c.close()
     conn.close()
@@ -116,18 +138,22 @@ def stir_json():
 
 @app.route("/temp_chart.html")
 def temp_chart():
-    json_url = config.base_url + "/temp_json/daily"
-    return render_template('temp_chart_template.html', json_url=json_url, pagetitle="Daily Temperature chart",temp_active="active",base_url=config.base_url)
+    json_url = config.base_url + "/temp_json/all"
+    return render_template('three_sensors_chart_template.html', 
+                           json_url=json_url, 
+                           agetitle="Last month Temperature chart",
+                           temp_active="active",
+                           base_url=config.base_url)
 
 @app.route("/temp_chart_24h.html")
 def temp_chart_24h():
     json_url = config.base_url + "/temp_json/last24"
-    return render_template('temp_chart_template.html', json_url=json_url, pagetitle="Temperature chart 24H",temp_24h_active="active")
+    return render_template('one_sensor_chart_template.html', json_url=json_url, pagetitle="Temperature chart 24H",temp_24h_active="active")
 
 @app.route("/temp_chart_avg.html")
 def temp_chart_avg():
     json_url = config.base_url + "/temp_json/hourly"
-    return render_template('temp_chart_template.html', json_url=json_url, pagetitle="Hourly Temperature chart",temp_avg_active="active")
+    return render_template('one_sensor_chart_template.html', json_url=json_url, pagetitle="Hourly Temperature chart",temp_avg_active="active")
 
 @app.route("/stir_chart.html")
 def stir_chart():
