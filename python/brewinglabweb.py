@@ -18,10 +18,10 @@ def temp_json1(sensor_id):
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute('select substr(temp_dt,1,4),substr(temp_dt,6,2),substr(temp_dt,9,2),substr(temp_dt,12,2),substr(temp_dt,15,2),temp from temp_log where sensor_id = ' + sensor_id + " order by 1")
-    all = c.fetchall()
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return json.dumps(all)
+    return json.dumps(rows)
 
 @app.route("/temp_json/hourly")
 def temp_json3():
@@ -35,10 +35,10 @@ order by 1,2,3,4"""
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute(q)
-    all = c.fetchall()
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return json.dumps(all)
+    return json.dumps(rows)
 
 @app.route("/temp_json/daily")
 def temp_json_daily():
@@ -52,10 +52,10 @@ order by 1,2,3"""
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute(q)
-    all = c.fetchall()
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return json.dumps(all)
+    return json.dumps(rows)
 
 @app.route("/temp_json/last24")
 def temp_json_last24():
@@ -71,15 +71,15 @@ def temp_json_last24():
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute(q)
-    all = c.fetchall()
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return json.dumps(all)
+    return json.dumps(rows)
 
 @app.route("/temp_json/all")
 def temp_json2():
     now  =  datetime.now(timezone.utc) 
-    past = now - timedelta(days=1) 
+    past = now - timedelta(days=30) 
     past_string = past.strftime("%Y-%m-%d %H:%M:%S")
 
     q = """SELECT y,m,d,hh,mm,sum(temp1), sum(temp2), sum(temp3)
@@ -105,10 +105,10 @@ order by 1,2,3,4,5"""
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute(q)
-    all = c.fetchall()
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return json.dumps(all)
+    return json.dumps(rows)
 
 @app.route("/light_json")
 def light_json():
@@ -118,10 +118,10 @@ def light_json():
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute("select substr(light_dt,1,4),substr(light_dt,6,2),substr(light_dt,9,2),substr(light_dt,12,2),substr(light_dt,15,2),light from light_log where light_dt > '" + yesterday_string + "' order by 1")
-    all = c.fetchall()
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return json.dumps(all)
+    return json.dumps(rows)
 
 @app.route("/stir_json")
 def stir_json():
@@ -131,10 +131,10 @@ def stir_json():
     conn = sqlite3.connect(config.DBPATH)
     c = conn.cursor()
     c.execute("select stir_dt,result from stir_log where stir_dt > '" + yesterday_string + "' order by 1 desc")
-    all = c.fetchall()
+    rows = c.fetchall()
     c.close()
     conn.close()
-    return json.dumps(all)
+    return json.dumps(rows)
 
 @app.route("/temp_chart.html")
 def temp_chart():

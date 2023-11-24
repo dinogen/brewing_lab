@@ -1,15 +1,33 @@
 {% extends "chart_template.html" %}
 {% block set_data %}
 
+var delay = parseInt(document.getElementById("hours").value);
+var chk_sensor0 = document.getElementById("sensor0").checked;
+var chk_sensor1 = document.getElementById("sensor1").checked;
+var chk_sensor3 = document.getElementById("sensor3").checked;
+if (!chk_sensor0 && !chk_sensor1 && !chk_sensor3 ) {chk_sensor3 = true;}
 var rawdata = JSON.parse(jsonData);
+let d = new Date();
+var ms = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(),d.getUTCHours(),d.getUTCMinutes()) - delay*60*60*1000;
+var past = new Date(ms);
+
 var data = new google.visualization.DataTable();
 data.addColumn('date', "Data");
-data.addColumn("number", "Lower");
-data.addColumn("number", "Upper");
-data.addColumn("number", "Average");
+if (chk_sensor0) {data.addColumn("number", "Lower");}
+if (chk_sensor1) {data.addColumn("number", "Upper");}
+if (chk_sensor3) {data.addColumn("number", "Average");}
+
 for (i = 0; i < rawdata.length; i++) {
     var row = rawdata[i];
-    data.addRow([new Date(row[0],row[1]-1,row[2],row[3],row[4]), row[5],row[6],row[7]]);
+    var dt = new Date(row[0],row[1]-1,row[2],row[3],row[4])
+    var arr = [dt]
+
+    if (dt >= past) {
+        if (chk_sensor0) { arr.push(row[5]); }
+        if (chk_sensor1) { arr.push(row[6]); }
+        if (chk_sensor3) { arr.push(row[7]); }
+        data.addRow(arr);
+    }
 }
 
 {% endblock %}

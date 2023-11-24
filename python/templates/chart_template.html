@@ -25,6 +25,20 @@
     </script>
 {% endblock %}
 {% block body %}
-    <div id="chart_div"></div>
+<form class="form-inline">
+<div class="form-group">
+    <label for="hours">Time Span</label>
+    <select name="hours" id="hours" onchange="drawChart()" class="form-control" width="100px">
+        <option value="1">Last hour</option>
+        <option value="3">Last 3H</option>
+        <option value="5" selected="selected">Last 5H</option>
+        <option value="24">Last 24h</option>
+    </select>
+    <div class="checkbox"><label><input type="checkbox" id="sensor0" onchange="drawChart()" checked> Lower Sensor</label></div>
+    <div class="checkbox"><label><input type="checkbox" id="sensor1" onchange="drawChart()" checked> Upper Sensor</label></div>
+    <div class="checkbox"><label><input type="checkbox" id="sensor3" onchange="drawChart()" checked> Average</label></div>
+</div>
+</form>
+<div id="chart_div"></div>
 {% endblock %}
     
